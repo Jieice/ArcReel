@@ -167,6 +167,7 @@ COLLECT_CHARACTER_EVIDENCE = ToolDeclaration(
         "手动分析已登记角色：严格扫描全部当前登记原文（排除切出集副本和未登记文件），缺文件明确失败。"
         "按角色名/已登记别名/extra_aliases收集全部命中及上下文，合并窗口并稳定有界分页；"
         "并自动加入这些称呼在原文中独立出现的省称后缀（alias_candidates标derived_short_form）；"
+        "原文出现的「姓+称谓」（标surname_title）也加入，同姓他人同样命中，须按上下文甄别。"
         "与名字字面无关的称谓须先查原文再经extra_aliases提供。"
         "返回snapshot_id/revision、原文扫描量、命中量、页数、称谓候选归属与参考身份。"
         "正文保留原始UTF-8解码文本与Unicode码点offset。别名、代词、通用称谓不能证明人物归属；"

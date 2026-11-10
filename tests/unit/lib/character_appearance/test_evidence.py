@@ -159,3 +159,27 @@ def test_short_forms_used_alone_in_the_source_are_searched_without_being_declare
     assert {item["term"] for item in english} == {"John Smith", "Smith"}
     # 不提供原文时行为不变。
     assert {item["term"] for item in build_alias_index(registry, "古月博", [])[0]} == {"古月博", "古月族长"}
+
+
+def test_surname_titles_found_in_the_source_are_candidates_unless_they_name_another_character() -> None:
+    text = "林晚秋进门。林医生摘下口罩，虎口有旧疤。林老师点头。陈医生老了。森林总是安静。"
+    registry = [
+        {"name": "林晚秋", "aliases": []},
+        {"name": "陈医生", "aliases": []},
+        {"name": "林风", "aliases": ["林老师"]},
+    ]
+
+    index, _ = build_alias_index(registry, "林晚秋", [], [text])
+    titled = {item["term"]: item for item in index if "surname_title" in item["match_kinds"]}
+    # 「林老师」已登记给林风；「陈医生」不同姓；单字称谓「林总」不收。
+    assert set(titled) == {"林医生"}
+    assert "surname_title_may_be_same_surname_other_person" in titled["林医生"]["ambiguity_reasons"]
+    documents, _ = build_documents([source(text)], index, registry)
+    assert "林医生" in [hit["matched_text"] for hit in documents[0]["hits"]]
+
+    compound, _ = build_alias_index([{"name": "欧阳明月", "aliases": []}], "欧阳明月", [], ["欧阳先生到了。"])
+    assert "欧阳先生" in {item["term"] for item in compound}
+    assert (
+        build_alias_index([{"name": "John Smith", "aliases": []}], "John Smith", [], ["J大人"])[0][0]["term"]
+        == "John Smith"
+    )

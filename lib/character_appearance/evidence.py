@@ -41,6 +41,69 @@ GENERIC_TITLES = frozenset(
         "maid",
     }
 )
+# 可接在姓氏后的常见称谓；只收两字以上，单字称谓（总、哥、姐）在连写文本里误命中太多。
+SURNAME_TITLES = frozenset(
+    [
+        "医生",
+        "大夫",
+        "老师",
+        "教授",
+        "博士",
+        "律师",
+        "警官",
+        "队长",
+        "经理",
+        "老板",
+        "掌柜",
+        "师傅",
+        "师父",
+        "师兄",
+        "师姐",
+        "师弟",
+        "师妹",
+        "先生",
+        "女士",
+        "小姐",
+        "姑娘",
+        "夫人",
+        "太太",
+        "公子",
+        "少爷",
+        "老爷",
+        "大人",
+        "将军",
+        "道长",
+        "长老",
+        "前辈",
+        "大哥",
+        "大姐",
+        "大叔",
+        "大爷",
+        "大娘",
+        "阿姨",
+        "叔叔",
+        "伯伯",
+        "婆婆",
+        "奶奶",
+        "爷爷",
+        "家主",
+        "族长",
+        "掌门",
+        "宗主",
+        "城主",
+        "总管",
+        "管家",
+        "捕头",
+        "统领",
+        "校尉",
+        "同学",
+        "主任",
+        "院长",
+        "局长",
+        "总裁",
+        "董事",
+    ]
+)
 _CHAPTER = re.compile(
     r"^(?:第[^\r\n]{1,24}[章回卷节][^\r\n]{0,100}|chapter[ \t]+[0-9IVXLC]+[^\r\n]{0,100})\r?$",
     re.MULTILINE | re.IGNORECASE,
@@ -81,6 +144,26 @@ def derive_short_forms(selected: set[str], texts: list[str]) -> dict[str, str]:
     return derived
 
 
+def derive_surname_titles(character_name: str, texts: list[str]) -> dict[str, str]:
+    """原文中出现的「姓 + 称谓」（如「林医生」「陈老师」）→ 所用的姓。
+
+    姓取本体名的首字；名字不少于三字时也试前两字（复姓）。同姓他人也会命中，所以只是候选。
+    """
+
+    name = normalized_term(character_name)
+    if len(name) < 2 or any(char.isascii() for char in name):
+        return {}
+    prefixes = [name[:2], name[:1]] if len(name) >= 3 else [name[:1]]
+    titles = "|".join(sorted(SURNAME_TITLES, key=len, reverse=True))
+    found: dict[str, str] = {}
+    for prefix in prefixes:
+        pattern = re.compile(re.escape(prefix) + "[老小大]?(?:" + titles + ")")
+        for text in texts:
+            for match in pattern.finditer(unicodedata.normalize("NFC", text)):
+                found.setdefault(match.group(), prefix)
+    return found
+
+
 def build_alias_index(
     registry: list[dict[str, Any]],
     character_name: str,
@@ -115,9 +198,18 @@ def build_alias_index(
     for term in derived:
         owners.setdefault(term, set()).add(character_name)
         kinds.setdefault(term, set()).add("derived_short_form")
+    # 已是其他登记角色名字或别名的「姓 + 称谓」属于那个角色，不借给本角色。
+    titled = {
+        term: prefix
+        for term, prefix in derive_surname_titles(character_name, source_texts or []).items()
+        if term not in selected and term not in derived and term not in owners
+    }
+    for term in titled:
+        owners.setdefault(term, set()).add(character_name)
+        kinds.setdefault(term, set()).add("surname_title")
     ignored: list[dict[str, str]] = []
     index: list[dict[str, Any]] = []
-    for term in sorted(selected | set(derived), key=lambda value: (-len(value), value)):
+    for term in sorted(selected | set(derived) | set(titled), key=lambda value: (-len(value), value)):
         if term.casefold() in PRONOUNS:
             ignored.append({"term": term, "reason": "pronoun_not_a_global_alias"})
             continue
@@ -136,6 +228,9 @@ def build_alias_index(
         if term in derived:
             reasons.append("derived_short_form")
             entry["derived_from"] = derived[term]
+        if term in titled:
+            reasons.append("surname_title_may_be_same_surname_other_person")
+            entry["derived_from"] = titled[term]
         index.append(entry)
     return index, ignored
 
