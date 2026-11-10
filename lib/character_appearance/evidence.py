@@ -51,10 +51,41 @@ def normalized_term(value: str) -> str:
     return unicodedata.normalize("NFC", value.strip())
 
 
+def _short_forms(term: str) -> list[str]:
+    """原文常用的省称候选：多词名取尾部词组，连写名（如中文）取长度不少于 2 的后缀。"""
+
+    words = term.split()
+    if len(words) > 1:
+        return [" ".join(words[index:]) for index in range(1, len(words))]
+    if any(char.isascii() and char.isalnum() for char in term):
+        return []
+    return [term[index:] for index in range(1, len(term) - 1)]
+
+
+def derive_short_forms(selected: set[str], texts: list[str]) -> dict[str, str]:
+    """原文中脱离全称独立出现的省称 → 它所出自的全称。
+
+    只检索全称会漏掉原文改用「方源」「族长」的句子；省称是否指本人仍由读证据的一方判断。
+    """
+
+    masked = [unicodedata.normalize("NFC", text) for text in texts]
+    for term in sorted(selected, key=len, reverse=True):
+        masked = [text.replace(term, "\0" * len(term)) for text in masked]
+    derived: dict[str, str] = {}
+    for term in sorted(selected, key=lambda value: (-len(value), value)):
+        for short in _short_forms(term):
+            if short in selected or short in derived or short.casefold() in PRONOUNS:
+                continue
+            if any(short in text for text in masked):
+                derived[short] = term
+    return derived
+
+
 def build_alias_index(
     registry: list[dict[str, Any]],
     character_name: str,
     extra_aliases: list[str],
+    source_texts: list[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     owners: dict[str, set[str]] = {}
     kinds: dict[str, set[str]] = {}
@@ -79,9 +110,14 @@ def build_alias_index(
             selected.add(term)
             owners.setdefault(term, set()).add(character_name)
             kinds.setdefault(term, set()).add("declared_alias")
+    searchable = {term for term in selected if term.casefold() not in PRONOUNS}
+    derived = derive_short_forms(searchable, source_texts or [])
+    for term in derived:
+        owners.setdefault(term, set()).add(character_name)
+        kinds.setdefault(term, set()).add("derived_short_form")
     ignored: list[dict[str, str]] = []
     index: list[dict[str, Any]] = []
-    for term in sorted(selected, key=lambda value: (-len(value), value)):
+    for term in sorted(selected | set(derived), key=lambda value: (-len(value), value)):
         if term.casefold() in PRONOUNS:
             ignored.append({"term": term, "reason": "pronoun_not_a_global_alias"})
             continue
@@ -90,15 +126,17 @@ def build_alias_index(
             reasons.append("shared_alias")
         if term.casefold() in GENERIC_TITLES:
             reasons.append("generic_title")
-        index.append(
-            {
-                "term": term,
-                "candidate_owners": sorted(owners.get(term, {character_name})),
-                "match_kinds": sorted(kinds.get(term, {"canonical_name"})),
-                "ambiguity_reasons": reasons,
-                "attribution": "candidate_only",
-            }
-        )
+        entry: dict[str, Any] = {
+            "term": term,
+            "candidate_owners": sorted(owners.get(term, {character_name})),
+            "match_kinds": sorted(kinds.get(term, {"canonical_name"})),
+            "ambiguity_reasons": reasons,
+            "attribution": "candidate_only",
+        }
+        if term in derived:
+            reasons.append("derived_short_form")
+            entry["derived_from"] = derived[term]
+        index.append(entry)
     return index, ignored
 
 

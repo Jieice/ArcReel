@@ -134,3 +134,28 @@ def test_chapter_hints_describe_match_locations_without_turning_chapters_into_li
     documents, _ = build_documents([source(text)], aliases, registry)
     assert [hit["nearest_chapter_heading"] for hit in documents[0]["hits"]] == ["第一章 前世", "第二章 重生"]
     assert "stages" not in documents[0]
+
+
+def test_short_forms_used_alone_in_the_source_are_searched_without_being_declared() -> None:
+    text = "古月族长中年模样，两鬓微霜。\n族长长叹一声。\n方源走过，老魔一笑。\nJohn Smith arrived. Smith sat down."
+    registry = [
+        {"name": "古月博", "aliases": ["古月族长"]},
+        {"name": "古月方源", "aliases": ["方老魔"]},
+        {"name": "John Smith", "aliases": []},
+    ]
+
+    chief, _ = build_alias_index(registry, "古月博", [], [text])
+    derived = {item["term"]: item for item in chief if "derived_short_form" in item["match_kinds"]}
+    # 「月博」「月族长」不在原文独立出现，「古月」是前缀：都不加入。
+    assert set(derived) == {"族长"}
+    assert derived["族长"]["derived_from"] == "古月族长"
+    assert set(derived["族长"]["ambiguity_reasons"]) == {"generic_title", "derived_short_form"}
+    documents, _ = build_documents([source(text)], chief, registry)
+    assert [hit["matched_text"] for hit in documents[0]["hits"]] == ["古月族长", "族长", "族长"]
+
+    hero, _ = build_alias_index(registry, "古月方源", [], [text])
+    assert {item["term"] for item in hero} == {"古月方源", "方老魔", "方源", "老魔"}
+    english, _ = build_alias_index(registry, "John Smith", [], [text])
+    assert {item["term"] for item in english} == {"John Smith", "Smith"}
+    # 不提供原文时行为不变。
+    assert {item["term"] for item in build_alias_index(registry, "古月博", [])[0]} == {"古月博", "古月族长"}

@@ -4,9 +4,9 @@
 
 | 内容 | 已部署值 |
 |---|---|
-| 镜像 tag | `arcreel/arcreel:local-character-evidence-ui-20261110-r3` |
-| Docker 镜像精确 `.Id` | `sha256:5de25ec8abd3d4a58d15d408d629bd57c4b87e329934bd890c9820e6d1b0fe49` |
-| 容器 ID | `9b01f7ae0d1d9ac635fb09255f776313deddaeb1f3939a125615cdeb365fb65b` |
+| 镜像 tag | `arcreel/arcreel:local-character-evidence-ui-20261110-r4` |
+| Docker 镜像精确 `.Id` | `sha256:449eee408e6e82242d2b6d63f02e332adc4a62409892ef87aeaac246899d42a2` |
+| 容器 ID | `d13b05f0c7e674a855180de647e6e6ec8ccbcda19050be7528f078a725c55794` |
 | r3 的基底（上一版 UI 镜像） | `sha256:5542a14b70d359c88069d871bd21904a28823549751f87eef06f5c7efa27b9e0` |
 | 后端候选基底 | `sha256:98d27cd77e3b6903d51d5f18d464d9db9667712122757fe63895645e7eae2b71` |
 | 回滚镜像精确 `.Id` | `sha256:daac5ee48fac86b6da22a449971bc3d345013e6c60a32e4fca4481a347695038` |
@@ -66,3 +66,9 @@ docker compose --project-name deploy --project-directory D:\AI\ArcReel\deploy `
 ```
 
 若要长期保持回滚版本，还需将常规 `docker-compose.override.yml` 的 image 改回 `arcreel/arcreel:local-asset-descriptions-20261110`，并核验其精确 `.Id`。镜像回滚继续使用原数据卷；恢复项目或数据库备份前，先核对部署后的用户编辑，避免覆盖新内容。
+
+## r4：自动补检省称
+
+r4 在 r3（`sha256:5de25ec8abd3d4a58d15d408d629bd57c4b87e329934bd890c9820e6d1b0fe49`）上覆盖 `lib/character_appearance/evidence.py`、`service.py`、`server/agent_toolset/character_appearance.py` 和 `analyze-character-appearance/SKILL.md`。采集时服务器自动加入角色名与已登记别名在原文中独立出现的后缀省称（标 `derived_short_form`，仍只是候选归属），不再依赖 Agent 每次自行补别名。
+
+对当前项目原文的只读核对：古月博新增「族长」，命中 9 → 56、2 → 3 页；沈翠新增「丫鬟」，46 → 52；古月方源新增「老魔」，328 → 330；方正无变化。与名字字面无关的称谓（如「家主」「舅父」）程序推不出，仍需登记为别名或由 Agent 查原文后提供。r4 未重跑内置 Agent 全流程。构建目录：`D:\AI\_tmp\arcreel-character-evidence-20261110\short-form-aliases`。

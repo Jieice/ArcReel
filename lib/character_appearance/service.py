@@ -163,7 +163,12 @@ class CharacterAppearanceService:
                 "provenance": "caller_declared_analysis_input_not_verified_user_confirmation",
             }
             basis, sources = compute_appearance_basis(self.project_dir, project, character_name, context)
-            aliases, ignored = build_alias_index(basis["character_registry"], character_name, request.extra_aliases)
+            aliases, ignored = build_alias_index(
+                basis["character_registry"],
+                character_name,
+                request.extra_aliases,
+                [source.text for source in sources],
+            )
             documents, pages = build_documents(sources, aliases, basis["character_registry"])
             snapshot_id = "cas_" + uuid4().hex
             snapshot = _versioned(

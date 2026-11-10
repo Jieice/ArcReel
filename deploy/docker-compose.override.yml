@@ -2,5 +2,5 @@
 # Deployment and rollback: local-asset-descriptions.md.
 services:
   arcreel:
-    image: arcreel/arcreel:local-character-evidence-ui-20261110-r3
+    image: arcreel/arcreel:local-character-evidence-ui-20261110-r4
     pull_policy: never
