@@ -2,6 +2,7 @@
 
 import pytest
 
+from lib.prompts.style_templates import resolve_template_prompt
 from tests.integration.server.routers.projects_router_support import (
     _FakePM,
     build_projects_client,
@@ -9,6 +10,48 @@ from tests.integration.server.routers.projects_router_support import (
 
 
 class TestProjectsRouter:
+    @pytest.mark.parametrize("prior_style", ["template", "image"])
+    def test_update_project_custom_text_style_replaces_prior_style(self, tmp_path, monkeypatch, prior_style):
+        fake_pm = _FakePM(tmp_path)
+        if prior_style == "template":
+            fake_pm.project_data["ready"]["style_template_id"] = "live_premium_drama"
+        else:
+            fake_pm.project_data["ready"]["style_image"] = "style_reference.png"
+            fake_pm.project_data["ready"]["style_description"] = "old image description"
+        description = "国风3D，精细建模\n冷色柔光与浅景深"
+        client = build_projects_client(monkeypatch, fake_pm)
+
+        with client:
+            response = client.patch(
+                "/api/v1/projects/ready",
+                json={"style": description, "style_template_id": None, "clear_style_image": True},
+            )
+            detail = client.get("/api/v1/projects/ready")
+
+        assert response.status_code == 200
+        assert detail.status_code == 200
+        for data in (response.json()["project"], detail.json()["project"], fake_pm.project_data["ready"]):
+            assert data["style"] == description
+            assert data.get("style_template_id") is None
+            assert data.get("style_image") is None
+            assert data.get("style_description") is None
+
+    def test_update_project_template_overrides_custom_text_in_same_request(self, tmp_path, monkeypatch):
+        fake_pm = _FakePM(tmp_path)
+        fake_pm.project_data["ready"]["style"] = "custom text"
+        client = build_projects_client(monkeypatch, fake_pm)
+
+        with client:
+            response = client.patch(
+                "/api/v1/projects/ready",
+                json={"style": "stale text", "style_template_id": "anim_cn_3d_semireal"},
+            )
+
+        assert response.status_code == 200
+        data = response.json()["project"]
+        assert data["style_template_id"] == "anim_cn_3d_semireal"
+        assert data["style"] == resolve_template_prompt("anim_cn_3d_semireal")
+
     def test_update_project_with_style_template_id_expands_and_clears_image(self, tmp_path, monkeypatch):
         """PATCH style_template_id：写入 id + 展开 prompt 到 style，并清掉 style_image/description。"""
         fake_pm = _FakePM(tmp_path)

@@ -2570,7 +2570,8 @@ class PatchProjectRequest(BaseModel):
         default=None,
         description=(
             "（资产 upsert 分支）{ 名称: { description, voice_style 等字段 } } 映射，至少一条；名称不存在则新增、"
-            "存在则合并改字段。角色条目可带 derivatives: { 衍生名: { description } }，登记本体之外的另一套外观，"
+            "存在则合并改字段。本体 description 写自足、稳定、可直接绘制的外观段落。"
+            "角色条目可带 derivatives: { 衍生名: { description } }，登记本体之外的另一套外观，"
             "按衍生名合并（同名改描述、新名加入、未提及的保留），description 写相对本体的变化"
         ),
     )

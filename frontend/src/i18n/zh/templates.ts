@@ -3,11 +3,16 @@ import type { DeepStringify } from "@/i18n/types";
 
 export default {
   category: {
+    cn3d: "3D 国风",
     custom: "自定义",
     live: "AI 真人剧",
     anim: "AI 漫剧",
   },
   name: {
+    anim_cn_3d_semireal: "国风3D · 半写实",
+    anim_cn_3d_xianxia: "国风3D · 仙侠史诗",
+    anim_cn_3d_wuxia: "国风3D · 暗黑武侠",
+    anim_cn_3d_ink: "国风3D · 水墨动画",
     live_cinematic_ancient: "精品古装",
     live_zhang_yimou: "张艺谋风格",
     live_ancient_xianxia: "古装仙侠",
@@ -46,6 +51,10 @@ export default {
     anim_90s_retro: "90 年代日漫",
   },
   tagline: {
+    anim_cn_3d_semireal: "精细建模 · 电影柔光",
+    anim_cn_3d_xianxia: "古装层叠 · 仙山雾光",
+    anim_cn_3d_wuxia: "冷色层次 · 陈旧材质",
+    anim_cn_3d_ink: "立体角色 · 水墨意境",
     live_cinematic_ancient: "专业打光 · 电视剧质感",
     live_zhang_yimou: "极致用色 · 仪式感",
     live_ancient_xianxia: "临江仙 · 美白滤镜",
@@ -139,6 +148,11 @@ export default {
   tab_custom_desc: "上传一张风格参考图，AI 会分析它的画风。上传后不再使用风格模版。",
   upload_reference: "上传风格参考图",
   supported_formats: "PNG / JPG / WEBP",
+  custom_text_mode: "文字描述",
+  custom_image_mode: "参考图片",
+  custom_text_label: "自定义风格描述",
+  custom_text_placeholder: "例如：半写实国风 3D 动画，精细角色建模、细腻发丝、柔和电影打光、冷青蓝色调，保持立体动画质感。",
+  custom_text_hint: "描述画面质感、材质、色彩与打光。使用文字描述时不会分析参考图片。",
   template_default_badge: "默认",
   wizard_step_basics: "基础信息",
   wizard_step_generation: "生成设置",

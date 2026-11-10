@@ -13,12 +13,13 @@ from lib.prompts.style_templates import (
 
 def test_templates_count_and_definition_order():
     ids = list_template_ids()
-    assert len(ids) == 36
-    assert len(set(ids)) == 36
+    assert len(ids) == 40
+    assert len(set(ids)) == 40
     assert ids[0] == "live_cinematic_ancient"
     assert ids[17] == "live_cyberpunk"
     assert ids[18] == "anim_3d_cg"
-    assert ids[-1] == "anim_90s_retro"
+    assert ids[35] == "anim_90s_retro"
+    assert ids[-1] == "anim_cn_3d_ink"
     assert all(tpl_id.startswith("live_") for tpl_id in ids[:18])
     assert all(tpl_id.startswith("anim_") for tpl_id in ids[18:])
 
@@ -51,6 +52,23 @@ def test_resolve_template_prompt_ok():
     assert resolve_template_prompt("live_premium_drama") == "真人电视剧风格，精品短剧画风，大师级构图"
 
 
+@pytest.mark.parametrize(
+    ("template_id", "visual_detail"),
+    [
+        ("anim_cn_3d_semireal", "次表面散射"),
+        ("anim_cn_3d_xianxia", "玉石"),
+        ("anim_cn_3d_wuxia", "陈旧织物"),
+        ("anim_cn_3d_ink", "墨色晕染"),
+    ],
+)
+def test_chinese_3d_presets_render_their_visual_direction(template_id, visual_detail):
+    prompt = resolve_template_prompt(template_id)
+
+    assert "国风3D" in prompt
+    assert "三维" in prompt
+    assert visual_detail in prompt
+
+
 @pytest.mark.parametrize("template_id", ["no_such_id", "../asset/sheet", "asset/sheet", ""])
 def test_resolve_template_prompt_unknown_raises(template_id):
     assert not is_known_template(template_id)
@@ -62,7 +80,7 @@ def test_list_templates_by_category():
     grouped = list_templates_by_category()
     assert set(grouped.keys()) == {"live", "anim"}
     assert len(grouped["live"]) == 18
-    assert len(grouped["anim"]) == 18
+    assert len(grouped["anim"]) == 22
     assert grouped["live"][0] == {
         "id": "live_cinematic_ancient",
         "prompt": "精品古装真人短剧风格，专业打光，高质量电视剧质感",

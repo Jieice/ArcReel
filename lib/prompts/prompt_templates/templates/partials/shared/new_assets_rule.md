@@ -10,3 +10,5 @@
 - `skip`：一次性出场、无需固定外观的人或物，只用文字描述，确认后不登记。
 
 `name` 与 `asset_name` 都是单个名字，衍生关系由 `target` 表达。已登记资产的描述保持原样，`merge` 与 `skip` 的 `description` 留空。
+
+{{ partial("shared/asset_description_rule") }}

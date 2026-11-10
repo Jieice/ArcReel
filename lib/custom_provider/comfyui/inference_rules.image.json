@@ -65,7 +65,8 @@
       { "input": "image1" },
       { "input": "image2" },
       { "input": "image3" },
-      { "input": "image", "class_types": ["FluxKontextImageScale", "ImageScaleToMaxDimension"] }
+      { "input": "image", "class_types": ["FluxKontextImageScale", "ImageScaleToMaxDimension"] },
+      { "input_prefix": "image_", "class_types": ["TextEncodeQwenImage21GH"] }
     ]
   },
   "sampler_ports": {
@@ -106,6 +107,7 @@
     { "class_type": "TextEncodeQwenImageEditPlus", "input": "image1" },
     { "class_type": "TextEncodeQwenImageEditPlus", "input": "image2" },
     { "class_type": "TextEncodeQwenImageEditPlus", "input": "image3" },
+    { "class_type": "TextEncodeQwenImage21GH", "input_prefix": "image_" },
     { "class_type": "ImageStitch", "input": "image2" },
     { "class_type": "ReferenceLatent", "input": "latent" },
     { "class_type": "MiniMaxH3ImageToVideo", "input": "first_frame" },

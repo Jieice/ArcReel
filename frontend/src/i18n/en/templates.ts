@@ -1,10 +1,15 @@
 export default {
   category: {
+    cn3d: "Chinese 3D",
     custom: "Custom",
     live: "Live Action",
     anim: "Animation",
   },
   name: {
+    anim_cn_3d_semireal: "Chinese 3D · Semi-realistic",
+    anim_cn_3d_xianxia: "Chinese 3D · Xianxia Epic",
+    anim_cn_3d_wuxia: "Chinese 3D · Dark Wuxia",
+    anim_cn_3d_ink: "Chinese 3D · Ink Animation",
     live_cinematic_ancient: "Cinematic Historical",
     live_zhang_yimou: "Zhang Yimou",
     live_ancient_xianxia: "Ancient Xianxia",
@@ -43,6 +48,10 @@ export default {
     anim_90s_retro: "90s Retro Anime",
   },
   tagline: {
+    anim_cn_3d_semireal: "Detailed modeling · Soft cinematic light",
+    anim_cn_3d_xianxia: "Layered robes · Misty mountains",
+    anim_cn_3d_wuxia: "Cool shadows · Weathered materials",
+    anim_cn_3d_ink: "3D characters · Ink atmosphere",
     live_cinematic_ancient: "Pro lighting · TV quality",
     live_zhang_yimou: "Bold colors · Ritual",
     live_ancient_xianxia: "Linjiangxian · Soft filter",
@@ -136,6 +145,11 @@ export default {
   tab_custom_desc: "Upload a style reference image for AI to analyze. Once uploaded, the style template is no longer used.",
   upload_reference: "Upload style reference",
   supported_formats: "PNG / JPG / WEBP",
+  custom_text_mode: "Text description",
+  custom_image_mode: "Reference image",
+  custom_text_label: "Custom style description",
+  custom_text_placeholder: "For example: semi-realistic Chinese 3D animation, detailed character modeling, fine hair, soft cinematic lighting and cool teal tones, with a dimensional animated look.",
+  custom_text_hint: "Describe the materials, colors, lighting and overall look. Text mode does not analyze a reference image.",
   template_default_badge: "Default",
   wizard_step_basics: "Basics",
   wizard_step_generation: "Generation",

@@ -1,5 +1,5 @@
 /** 风格模版前端清单（id + category + thumbnail，prompt 由后端展开）。 */
-export type StyleCategory = "live" | "anim";
+export type StyleCategory = "live" | "anim" | "cn3d";
 
 export interface StyleTemplate {
   id: string;
@@ -27,9 +27,8 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
   { id: "live_wong",              category: "live", thumbnail: "/style-thumbnails/live_wong.png" },
   { id: "live_shaw",              category: "live", thumbnail: "/style-thumbnails/live_shaw.png" },
   { id: "live_cyberpunk",         category: "live", thumbnail: "/style-thumbnails/live_cyberpunk.png" },
-  // ===== 动画 (18) =====
+  // ===== 动画 =====
   { id: "anim_3d_cg",             category: "anim", thumbnail: "/style-thumbnails/anim_3d_cg.png" },
-  { id: "anim_cn_3d",             category: "anim", thumbnail: "/style-thumbnails/anim_cn_3d.png" },
   { id: "anim_kyoto",             category: "anim", thumbnail: "/style-thumbnails/anim_kyoto.png" },
   { id: "anim_arcane",            category: "anim", thumbnail: "/style-thumbnails/anim_arcane.png" },
   { id: "anim_us_3d",             category: "anim", thumbnail: "/style-thumbnails/anim_us_3d.png" },
@@ -46,6 +45,11 @@ export const STYLE_TEMPLATES: StyleTemplate[] = [
   { id: "anim_bloodborne",        category: "anim", thumbnail: "/style-thumbnails/anim_bloodborne.png" },
   { id: "anim_itojunji",          category: "anim", thumbnail: "/style-thumbnails/anim_itojunji.png" },
   { id: "anim_90s_retro",         category: "anim", thumbnail: "/style-thumbnails/anim_90s_retro.png" },
+  { id: "anim_cn_3d_semireal",    category: "cn3d", thumbnail: "/style-thumbnails/anim_cn_3d_semireal.png" },
+  { id: "anim_cn_3d_xianxia",     category: "cn3d", thumbnail: "/style-thumbnails/anim_cn_3d_xianxia.png" },
+  { id: "anim_cn_3d_wuxia",       category: "cn3d", thumbnail: "/style-thumbnails/anim_cn_3d_wuxia.png" },
+  { id: "anim_cn_3d_ink",         category: "cn3d", thumbnail: "/style-thumbnails/anim_cn_3d_ink.png" },
+  { id: "anim_cn_3d",             category: "cn3d", thumbnail: "/style-thumbnails/anim_cn_3d.png" },
 ];
 
 export const DEFAULT_TEMPLATE_ID = "live_premium_drama";

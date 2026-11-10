@@ -381,6 +381,57 @@ describe("API", () => {
     });
   });
 
+  describe("model candidates compatibility", () => {
+    const candidates = {
+      image: { default: ["local/qwen"], buckets: { t2i: ["local/qwen"], i2i: [] } },
+      video: { default: ["local/video"], buckets: { i2v: ["local/video"], r2v: [] } },
+      provider_names: { local: "Local" },
+      model_names: { "local/qwen": "Qwen" },
+    };
+
+    it("fills optional metadata absent from an older backend without changing its candidates", async () => {
+      const fetchMock = vi.fn().mockResolvedValue(mockResponse({ jsonData: candidates }));
+      vi.stubGlobal("fetch", fetchMock);
+      const signal = new AbortController().signal;
+
+      const result = await API.getModelCandidates({ signal });
+
+      expect(result).toEqual({
+        ...candidates,
+        image: { ...candidates.image, filtered: {} },
+        video: { ...candidates.video, filtered: {} },
+        lifecycle: {},
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/v1/system/config/model-candidates", expect.objectContaining({ signal }),
+      );
+    });
+
+    it("preserves filtered reasons and lifecycle notices from a current backend", async () => {
+      const current = {
+        ...candidates,
+        image: { ...candidates.image, filtered: { i2i: [{ option: "local/qwen", unmet: ["image_to_image"] }] } },
+        video: { ...candidates.video, filtered: { r2v: [{ option: "local/video", unmet: ["max_reference_images"] }] } },
+        lifecycle: {
+          "local/qwen": { status: "retiring", shutdown_date: "2026-12-01", successor: null, successor_name: null, switch_targets: {} },
+        },
+      };
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue(mockResponse({ jsonData: current })));
+
+      expect(await API.getModelCandidates()).toEqual(current);
+    });
+
+    it("keeps a failed or incomplete response as a loading failure", async () => {
+      const fetchMock = vi.fn()
+        .mockResolvedValueOnce(mockResponse({ ok: false, jsonData: { detail: "Unavailable" } }))
+        .mockResolvedValueOnce(mockResponse({ jsonData: { video: candidates.video } }));
+      vi.stubGlobal("fetch", fetchMock);
+
+      await expect(API.getModelCandidates()).rejects.toThrow("Unavailable");
+      await expect(API.getModelCandidates()).rejects.toBeInstanceOf(TypeError);
+    });
+  });
+
   describe("request-based wrappers", () => {
     it("covers project, character, scene, prop, product, script and generation endpoints", async () => {
       const requestSpy = vi

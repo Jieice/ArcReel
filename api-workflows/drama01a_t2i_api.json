@@ -1,0 +1,181 @@
+{
+ "1": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+   "weight_dtype": "default"
+  },
+  "_meta": {
+   "title": "Qwen Image 2.1 · 当前4096维模型"
+  }
+ },
+ "2": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+   "type": "qwen_image",
+   "device": "default"
+  },
+  "_meta": {
+   "title": "Qwen 2.1文本编码器"
+  }
+ },
+ "3": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+  },
+  "_meta": {
+   "title": "Qwen 2.1 VAE · 整图与角色参考"
+  }
+ },
+ "4": {
+  "class_type": "TextEncodeQwenImage21GH",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "prompt": "基于图1做同一场景的真人电影剧照编辑，不重新设计人物和长廊。图1是两位成年女性所在的宫殿长廊整图，图2只用于核对右侧白衣white_01的原脸、盘发、金色冠饰、耳饰、象牙白金色刺绣衣袍和腰带，图3只用于核对左侧青衣teal_01的原脸、发髻、发饰、深青绿色金色植物刺绣衣袍和腰带。严格保留图1两位角色各自原本的成年年龄、脸型、五官和真实皮肤，不给她们换脸或换衣服。画面仍恰好只有这两位成年女性，青衣始终左侧、白衣始终右侧。保持原长廊的石柱、深色雕花木门、石砖、透视和柔和左侧自然日光，头饰完整入镜，真实织物与金属细节，横向1344×768。把原来面向镜头的合影站姿改为自然交谈的相向站姿：两人的身体都向画面中间转约四十五度，青衣的脸为向右的自然三分之二侧面，白衣的脸为向左的自然三分之二侧面，两个鼻尖彼此相向。两人的瞳孔和目光准确看向对方的眼睛或脸，观众能看到两人脸部的侧面与部分另一只眼睛。青衣身体略向前倾，一只手轻拢袖口，注意地听；白衣右手自然停在腹前，准备温和示意青衣停一下。两位角色嘴唇自然闭合，表情克制而警觉，姿态有生活感。这是剧情中的交谈瞬间。",
+   "negative_prompt": "front-facing portrait, looking at camera, duplicate person, altered identity, changed costume, child, cropped crown, text, watermark",
+   "latent_width": 1344,
+   "latent_height": 768,
+   "mode": "填充",
+   "ref_image_size": "768",
+   "vae": [
+    "3",
+    0
+   ],
+   "image_01": [
+    "8",
+    0
+   ],
+   "image_02": [
+    "9",
+    0
+   ],
+   "image_03": [
+    "11",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "① 整图编辑 · 相向视线与明确动作"
+  }
+ },
+ "5": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "12",
+    0
+   ],
+   "seed": 2026110501,
+   "steps": 30,
+   "cfg": 1,
+   "sampler_name": "euler",
+   "scheduler": "simple",
+   "positive": [
+    "4",
+    0
+   ],
+   "negative": [
+    "4",
+    1
+   ],
+   "latent_image": [
+    "10",
+    0
+   ],
+   "denoise": 1
+  },
+  "_meta": {
+   "title": "② 生成首帧或目标尾帧 · 先人工核对"
+  }
+ },
+ "6": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "5",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "解码1344×768"
+  }
+ },
+ "7": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "6",
+    0
+   ],
+   "filename_prefix": "剧情短剧/首帧_相向"
+  },
+  "_meta": {
+   "title": "③ 保存后核对角色、视线、手和长廊"
+  }
+ },
+ "8": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "剧情短剧_长廊整图参考.png"
+  },
+  "_meta": {
+   "title": "图1 · 沿用已审核的同机位整图"
+  }
+ },
+ "9": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "剧情短剧_白衣角色参考.png"
+  },
+  "_meta": {
+   "title": "图2 · white_01原脸与冠饰"
+  }
+ },
+ "10": {
+  "class_type": "VRAM_Debug",
+  "inputs": {
+   "empty_cache": true,
+   "gc_collect": true,
+   "unload_all_models": true,
+   "any_input": [
+    "4",
+    2
+   ]
+  },
+  "_meta": {
+   "title": "参考编码后释放 · 透传原潜变量"
+  }
+ },
+ "11": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "剧情短剧_青衣角色参考.png"
+  },
+  "_meta": {
+   "title": "图3 · teal_01原脸与服饰"
+  }
+ },
+ "12": {
+  "class_type": "LoraLoaderModelOnly",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "lora_name": "Qwen2.1 一致性无偏移_GH_V1.0.safetensors",
+   "strength_model": 0.35
+  },
+  "_meta": {
+   "title": "匹配Qwen 2.1一致性LoRA · 低强度实测"
+  }
+ }
+}

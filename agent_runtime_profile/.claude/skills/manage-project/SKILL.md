@@ -26,6 +26,8 @@ user-invocable: false
 意图驱动**（避免静默覆盖人工编辑过的字段）。本集新出现的资产由脚本规划带出、内容确认时登记，不需要在这里预先写入。
 `aliases`（别名）是字符串列表，只供脚本规划认人，不能写进引用。
 
+写入新资产或按用户明确要求修订 `description` 前，先读取 `.claude/references/asset-description.md`，按自足、稳定、可直接绘制的外观规范检查本体描述。原文依据与少量制作补全在候选说明中区分，不把说明写进外观段落；衍生仍只写相对本体的变化。
+
 ```text
 mcp__arcreel__patch_project({"table": "characters", "entries": {"角色名": {"description": "...", "voice_style": "..."}}})
 mcp__arcreel__patch_project({"table": "characters", "entries": {"角色名": {"derivatives": {"战斗装": {"description": "换上黑色重甲，其余外观保持不变"}}}}})

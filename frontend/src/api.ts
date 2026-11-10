@@ -446,7 +446,16 @@ class API {
   static async getModelCandidates(
     options: { signal?: AbortSignal } = {}
   ): Promise<ModelCandidatesResponse> {
-    return this.request("/system/config/model-candidates", { signal: options.signal });
+    const candidates = await this.request<ModelCandidatesResponse>("/system/config/model-candidates", {
+      signal: options.signal,
+    });
+    // 旧版后端尚未附带被过滤候选与下线提示；只补充这些可缺省的元数据，保留模型候选本身。
+    return {
+      ...candidates,
+      image: { ...candidates.image, filtered: candidates.image.filtered ?? {} },
+      video: { ...candidates.video, filtered: candidates.video.filtered ?? {} },
+      lifecycle: candidates.lifecycle ?? {},
+    };
   }
 
   /** 「自动选择」的实际模型：各用途在全部层留空时后端自动选中的模型，供应商配置变化后需重取。 */

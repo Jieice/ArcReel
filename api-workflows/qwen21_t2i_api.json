@@ -1,0 +1,109 @@
+{
+ "1": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+   "weight_dtype": "default"
+  },
+  "_meta": {
+   "title": "图片模型 · Qwen Image 2.1"
+  }
+ },
+ "2": {
+  "class_type": "CLIPLoader",
+  "inputs": {
+   "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+   "type": "qwen_image",
+   "device": "default"
+  },
+  "_meta": {
+   "title": "文本编码器 · 与图片模型匹配"
+  }
+ },
+ "3": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+  },
+  "_meta": {
+   "title": "图片解码器"
+  }
+ },
+ "4": {
+  "class_type": "TextEncodeQwenImage21GH",
+  "inputs": {
+   "clip": [
+    "2",
+    0
+   ],
+   "prompt": "A live-action photograph of a modern apartment entrance, with exactly one original small 2D chibi girl composited naturally into the real scene. The girl is only 2.5 heads tall, with a very large round head, tiny body, large expressive brown eyes, short dark-brown bob hair, a teal hooded jacket, cream skirt and brown ankle boots. Clean flat anime cel shading, crisp illustrated outlines, clearly a flat 2D cartoon character rather than a realistic human or a 3D toy. Full body visible, both boots resting on a brown doormat, facing the camera, smiling gently, her right hand raised at shoulder height ready to wave. The surrounding entrance is photorealistic: beige stone walls, a wooden front door, real ceramic floor tiles and potted green plants. Warm afternoon sunlight, realistic material textures and camera perspective. A soft contact shadow below the cartoon character anchors her to the real ground. Doorbell-camera composition, generous room around the character, wide landscape shot. No other people, no text, no captions, no watermark.",
+   "negative_prompt": "realistic human character, 3D doll, normal adult proportions, anime background, extra people, malformed hands, extra fingers, floating feet, text, watermark",
+   "latent_width": 864,
+   "latent_height": 480,
+   "mode": "填充",
+   "ref_image_size": "自动"
+  },
+  "_meta": {
+   "title": "① 写首帧画面 · 原创Q版人物＋实景"
+  }
+ },
+ "5": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "seed": 2026110401,
+   "steps": 30,
+   "cfg": 1,
+   "sampler_name": "euler",
+   "scheduler": "simple",
+   "positive": [
+    "4",
+    0
+   ],
+   "negative": [
+    "4",
+    1
+   ],
+   "latent_image": [
+    "4",
+    2
+   ],
+   "denoise": 1
+  },
+  "_meta": {
+   "title": "② 生成首帧 · 固定种子便于比较"
+  }
+ },
+ "6": {
+  "class_type": "VAEDecode",
+  "inputs": {
+   "samples": [
+    "5",
+    0
+   ],
+   "vae": [
+    "3",
+    0
+   ]
+  },
+  "_meta": {
+   "title": "解码图片"
+  }
+ },
+ "7": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "6",
+    0
+   ],
+   "filename_prefix": "短剧Q版/01_首帧"
+  },
+  "_meta": {
+   "title": "③ 保存并检查首帧，再进入视频流程"
+  }
+ }
+}

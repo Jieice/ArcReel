@@ -12,6 +12,27 @@ const liveValue: StylePickerValue = {
 };
 
 describe("StylePicker", () => {
+  it("shows Chinese 3D presets in their own category and selects the semi-realistic preset", () => {
+    const onChange = vi.fn();
+    render(<StylePicker value={{ ...liveValue, activeCategory: "cn3d" }} onChange={onChange} />);
+    expect(screen.getByRole("tab", { name: "3D 国风" })).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(screen.getByRole("button", { name: "国风3D · 半写实" }));
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ templateId: "anim_cn_3d_semireal", activeCategory: "cn3d" }));
+  });
+
+  it("edits text independently of a reference image and preserves the text while switching modes", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<StylePicker value={{ ...liveValue, mode: "text", customText: "国风 3D" }} onChange={onChange} />);
+    fireEvent.change(screen.getByRole("textbox", { name: "自定义风格描述" }), { target: { value: "国风 3D，冷青蓝柔光" } });
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ mode: "text", customText: "国风 3D，冷青蓝柔光" }));
+    expect(document.querySelector("input[type='file']")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "参考图片" }));
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ mode: "custom", customText: "国风 3D" }));
+    rerender(<StylePicker value={{ ...liveValue, mode: "custom", customText: "国风 3D" }} onChange={onChange} />);
+    fireEvent.click(screen.getByRole("button", { name: "文字描述" }));
+    expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ mode: "text", customText: "国风 3D" }));
+  });
+
   it("selects a template from the active category", () => {
     const onChange = vi.fn();
     render(<StylePicker value={liveValue} onChange={onChange} />);

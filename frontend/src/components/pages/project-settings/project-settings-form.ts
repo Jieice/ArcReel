@@ -28,10 +28,11 @@ export interface GlobalModelDefaults {
   auto?: AutoBackendsResponse | null;
 }
 
-/** 项目的风格：模版与参考图二选一，也可以都不设。 */
+/** 项目的风格：模版、文字与参考图互斥，也可以都不设。 */
 export type ProjectStyle =
   | { kind: "none" }
   | { kind: "template"; templateId: string }
+  | { kind: "text"; description: string }
   | {
       kind: "image";
       /** 已保存的参考图地址，或待上传文件的 blob: 地址。 */
@@ -201,7 +202,9 @@ export function deriveForm(
         }
       : templateId
         ? { kind: "template", templateId }
-        : { kind: "none" },
+        : str(project.style).trim()
+          ? { kind: "text", description: str(project.style) }
+          : { kind: "none" },
     models: {
       ...models,
       defaultDuration: finiteOrNull(project.default_duration),
@@ -255,7 +258,9 @@ function fullProjectPatch(
       ? {}
       : value.style.kind === "template"
         ? { style_template_id: value.style.templateId }
-        : { style_template_id: null, clear_style_image: true };
+        : value.style.kind === "text"
+          ? { style_template_id: null, clear_style_image: true, style: value.style.description.trim() }
+          : { style_template_id: null, clear_style_image: true };
 
   return {
     video_backend: models.videoBackend || null,
@@ -300,7 +305,7 @@ function sameModelSettings(a: Record<string, ModelSettingEntry>, b: Record<strin
 /**
  * 生成项目 PATCH 的请求体：只含与已保存内容不同的键，`model_settings` 整体比较、有变化时整表写入。
  * 未改动的键不回写，避免覆盖别处刚保存的设置；旧项目可能留着裸供应商的音频后端，原样回写也会被快照校验拒绝。
- * 风格选了模版或被清除时一并写入；选了新参考图时不在这里，由随后的参考图上传写入（上传同时清掉模版）。
+ * 风格选了模版、填写文字或被清除时一并写入；新参考图由随后的上传写入（上传同时清掉模版）。
  */
 export function buildProjectPatch(
   value: ProjectSettingsForm,

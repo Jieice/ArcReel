@@ -3,11 +3,16 @@ import type { DeepStringify } from "@/i18n/types";
 
 export default {
   category: {
+    cn3d: "3D cổ phong",
     custom: "Tùy chỉnh",
     live: "Người đóng",
     anim: "Hoạt hình",
   },
   name: {
+    anim_cn_3d_semireal: "3D cổ phong · Bán hiện thực",
+    anim_cn_3d_xianxia: "3D cổ phong · Tiên hiệp sử thi",
+    anim_cn_3d_wuxia: "3D cổ phong · Võ hiệp u tối",
+    anim_cn_3d_ink: "3D cổ phong · Hoạt hình thủy mặc",
     live_cinematic_ancient: "Cổ trang điện ảnh",
     live_zhang_yimou: "Trương Nghệ Mưu",
     live_ancient_xianxia: "Cổ trang Tiên hiệp",
@@ -46,6 +51,10 @@ export default {
     anim_90s_retro: "Anime hoài cổ thập niên 90",
   },
   tagline: {
+    anim_cn_3d_semireal: "Mô hình chi tiết · Ánh sáng dịu",
+    anim_cn_3d_xianxia: "Cổ phục nhiều lớp · Núi trong sương",
+    anim_cn_3d_wuxia: "Bóng lạnh · Vật liệu cũ",
+    anim_cn_3d_ink: "Nhân vật 3D · Không khí thủy mặc",
     live_cinematic_ancient: "Ánh sáng chuyên nghiệp · Chất lượng truyền hình",
     live_zhang_yimou: "Màu sắc đậm · Nghi lễ",
     live_ancient_xianxia: "Lâm Giang Tiên · Filter dịu",
@@ -139,6 +148,11 @@ export default {
   tab_custom_desc: "Tải lên ảnh tham chiếu phong cách để AI phân tích. Sau khi tải lên, mẫu phong cách không còn được dùng.",
   upload_reference: "Tải lên ảnh tham chiếu phong cách",
   supported_formats: "PNG / JPG / WEBP",
+  custom_text_mode: "Mô tả bằng chữ",
+  custom_image_mode: "Ảnh tham khảo",
+  custom_text_label: "Mô tả phong cách tùy chỉnh",
+  custom_text_placeholder: "Ví dụ: hoạt hình 3D cổ phong bán hiện thực, mô hình nhân vật tinh tế, tóc chi tiết, ánh sáng điện ảnh dịu và tông xanh lạnh, giữ cảm giác hoạt hình có chiều sâu.",
+  custom_text_hint: "Mô tả vật liệu, màu sắc, ánh sáng và cảm giác hình ảnh. Chế độ chữ không phân tích ảnh tham khảo.",
   template_default_badge: "Mặc định",
   wizard_step_basics: "Cơ bản",
   wizard_step_generation: "Thiết lập tạo",

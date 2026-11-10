@@ -1,0 +1,329 @@
+{
+  "kind": "comfyui",
+  "schema_version": "1.0.0",
+  "media_type": "image",
+  "meta": {
+    "name": "Qwen2.1 图生图 · 4参考 · 一致性LoRA",
+    "author": "Jieice",
+    "version": "0.2.0"
+  },
+  "workflow": {
+    "1": {
+      "class_type": "UNETLoader",
+      "inputs": {
+        "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+        "weight_dtype": "default"
+      },
+      "_meta": {
+        "title": "图片模型 · Qwen Image 2.1"
+      }
+    },
+    "2": {
+      "class_type": "CLIPLoader",
+      "inputs": {
+        "clip_name": "qwen3vl_8b_int8_convrot.safetensors",
+        "type": "qwen_image",
+        "device": "default"
+      },
+      "_meta": {
+        "title": "文本编码器"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "texture_fix_vae_qwen21.safetensors"
+      },
+      "_meta": {
+        "title": "VAE"
+      }
+    },
+    "4": {
+      "class_type": "TextEncodeQwenImage21GH",
+      "inputs": {
+        "clip": [
+          "2",
+          0
+        ],
+        "prompt": "a cinematic photograph, soft daylight",
+        "negative_prompt": "",
+        "latent_width": 1536,
+        "latent_height": 864,
+        "mode": "填充",
+        "ref_image_size": "自动",
+        "vae": [
+          "3",
+          0
+        ],
+        "image_01": [
+          "8",
+          0
+        ],
+        "image_02": [
+          "20",
+          0
+        ],
+        "image_03": [
+          "21",
+          0
+        ],
+        "image_04": [
+          "22",
+          0
+        ]
+      },
+      "_meta": {
+        "title": "编码 · 提示词/尺寸"
+      }
+    },
+    "5": {
+      "class_type": "KSampler",
+      "inputs": {
+        "model": [
+          "12",
+          0
+        ],
+        "seed": 20261107,
+        "steps": 16,
+        "cfg": 1,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "positive": [
+          "4",
+          0
+        ],
+        "negative": [
+          "4",
+          1
+        ],
+        "latent_image": [
+          "4",
+          2
+        ],
+        "denoise": 1
+      },
+      "_meta": {
+        "title": "采样"
+      }
+    },
+    "6": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": [
+          "5",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ]
+      },
+      "_meta": {
+        "title": "解码"
+      }
+    },
+    "7": {
+      "class_type": "SaveImage",
+      "inputs": {
+        "images": [
+          "6",
+          0
+        ],
+        "filename_prefix": "Arcreel/QwenI2I"
+      },
+      "_meta": {
+        "title": "保存"
+      }
+    },
+    "8": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "arcreel_reference.png"
+      },
+      "_meta": {
+        "title": "参考图 · 由 ArcReel 注入"
+      }
+    },
+    "9": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "1",
+          0
+        ],
+        "lora_name": "Qwen2.1 一致性无偏移_GH_V1.0.safetensors",
+        "strength_model": 0.48
+      },
+      "_meta": {
+        "title": "LoRA · Qwen2.1 一致性无偏移_GH_V1.0.safetensors"
+      }
+    },
+    "11": {
+      "class_type": "QwenImage21Cache",
+      "inputs": {
+        "model": [
+          "13",
+          0
+        ],
+        "device": "auto",
+        "dtype": "int8"
+      }
+    },
+    "12": {
+      "class_type": "TESpeedQwenImage21",
+      "inputs": {
+        "model": [
+          "11",
+          0
+        ],
+        "attention": "default",
+        "step_cache": "te_predictor",
+        "reuse_threshold": 0.06,
+        "start_percent": 0,
+        "end_percent": 0,
+        "predictor_error_limit": 0.08,
+        "verbose": false
+      }
+    },
+    "13": {
+      "class_type": "LoraLoaderModelOnly",
+      "inputs": {
+        "model": [
+          "9",
+          0
+        ],
+        "lora_name": "qwen21_turbo_lora_r178.safetensors",
+        "strength_model": 0.6
+      }
+    },
+    "20": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "arcreel_reference_2.png"
+      },
+      "_meta": {
+        "title": "参考图 2 · 由 ArcReel 注入"
+      }
+    },
+    "21": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "arcreel_reference_3.png"
+      },
+      "_meta": {
+        "title": "参考图 3 · 由 ArcReel 注入"
+      }
+    },
+    "22": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "arcreel_reference_4.png"
+      },
+      "_meta": {
+        "title": "参考图 4 · 由 ArcReel 注入"
+      }
+    }
+  },
+  "bindings": {
+    "prompt": [
+      {
+        "node": "4",
+        "input": "prompt",
+        "class_type": "TextEncodeQwenImage21GH",
+        "title": "编码 · 提示词/尺寸"
+      }
+    ],
+    "negative_prompt": [
+      {
+        "node": "4",
+        "input": "negative_prompt",
+        "class_type": "TextEncodeQwenImage21GH",
+        "title": "编码 · 提示词/尺寸"
+      }
+    ],
+    "seed": [
+      {
+        "node": "5",
+        "input": "seed",
+        "class_type": "KSampler",
+        "policy": "random",
+        "title": "采样"
+      }
+    ],
+    "output": [
+      {
+        "node": "7",
+        "class_type": "SaveImage",
+        "title": "保存"
+      }
+    ],
+    "reference_images": [
+      {
+        "node": "8",
+        "input": "image",
+        "class_type": "LoadImage",
+        "title": "参考图 · 由 ArcReel 注入",
+        "consumer": {
+          "node": "4",
+          "input": "image_01",
+          "class_type": "TextEncodeQwenImage21GH",
+          "title": "编码 · 提示词/尺寸"
+        }
+      },
+      {
+        "node": "20",
+        "input": "image",
+        "class_type": "LoadImage",
+        "title": "参考图 2 · 由 ArcReel 注入",
+        "consumer": {
+          "node": "4",
+          "input": "image_02",
+          "class_type": "TextEncodeQwenImage21GH",
+          "title": "编码 · 提示词/尺寸"
+        }
+      },
+      {
+        "node": "21",
+        "input": "image",
+        "class_type": "LoadImage",
+        "title": "参考图 3 · 由 ArcReel 注入",
+        "consumer": {
+          "node": "4",
+          "input": "image_03",
+          "class_type": "TextEncodeQwenImage21GH",
+          "title": "编码 · 提示词/尺寸"
+        }
+      },
+      {
+        "node": "22",
+        "input": "image",
+        "class_type": "LoadImage",
+        "title": "参考图 4 · 由 ArcReel 注入",
+        "consumer": {
+          "node": "4",
+          "input": "image_04",
+          "class_type": "TextEncodeQwenImage21GH",
+          "title": "编码 · 提示词/尺寸"
+        }
+      }
+    ],
+    "width": [
+      {
+        "node": "4",
+        "input": "latent_width",
+        "class_type": "TextEncodeQwenImage21GH",
+        "step": 32,
+        "title": "编码 · 提示词/尺寸"
+      }
+    ],
+    "height": [
+      {
+        "node": "4",
+        "input": "latent_height",
+        "class_type": "TextEncodeQwenImage21GH",
+        "step": 32,
+        "title": "编码 · 提示词/尺寸"
+      }
+    ]
+  }
+}

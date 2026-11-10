@@ -495,6 +495,23 @@ describe("CreateProjectModal", () => {
     );
     expect(API.uploadStyleImage).not.toHaveBeenCalled();
   });
+
+  it("requires nonempty custom text and submits it without an image or template", async () => {
+    render(<CreateProjectModal />);
+    fillBasics();
+    const create = await walkToStyle();
+    fireEvent.click(screen.getByRole("tab", { name: "自定义" }));
+    fireEvent.click(screen.getByRole("button", { name: "文字描述" }));
+    expect(create).toBeDisabled();
+    const description = screen.getByRole("textbox", { name: "自定义风格描述" });
+    fireEvent.change(description, { target: { value: "   " } });
+    expect(create).toBeDisabled();
+    fireEvent.change(description, { target: { value: "  国风 3D，电影柔光  " } });
+    expect(create).toBeEnabled();
+    fireEvent.click(create);
+    await waitFor(() => expect(API.createProject).toHaveBeenCalledWith(expect.objectContaining({ style: "国风 3D，电影柔光", style_template_id: null })));
+    expect(API.uploadStyleImage).not.toHaveBeenCalled();
+  });
 });
 
 describe("CreateProjectModal ad mode", () => {

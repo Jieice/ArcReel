@@ -36,6 +36,7 @@ PATCH_PROJECT = ToolDeclaration(
         f"白名单字段 {list(PROJECT_OVERVIEW_FIELDS)}，只改传入字段、概述不存在时创建。写入后结构非法时不落盘"
         "并返回 problem。资产改名不要用本工具（会变成「新名新建 + 旧名残留」），改用 rename_asset。"
         "项目数据升级失败时仍可调用，用于修复。"
+        "资产本体 description 写自足、稳定、可直接绘制的外观，角色衍生只写相对本体的变化。"
     ),
     request_model=PatchProjectRequest,
     migration=_REPAIR_WRITE,

@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 from lib.agent.agent_memory_paths import ARCREEL_DIRNAME, is_valid_memory_user_id
+from lib.character_appearance.paths import CHARACTER_APPEARANCE_RELATIVE_PATH
 from lib.episode.episode_paths import (
     AGENT_PROTECTED_SCRIPT_PLAN_FILENAMES,
     DRAMA_SCRIPT_PLAN_QUARANTINE_FILENAME,
@@ -846,6 +847,11 @@ class AgentAccessPolicy:
         return any(cls._is_within_for_compare(target, base / "versions") for base in bases)
 
     @classmethod
+    def _is_protected_character_appearance(cls, target: Path, bases: list[Path]) -> bool:
+        """证据、交付回执、提案与审计只能由分析工具写入，阻止直写伪造出处。"""
+        return any(cls._is_within_for_compare(target, base / CHARACTER_APPEARANCE_RELATIVE_PATH) for base in bases)
+
+    @classmethod
     def _is_protected_formal_script_plan(cls, target: Path, bases: list[Path]) -> bool:
         """命中受写禁的正式 script_plan（``drafts/episode_N/`` 下 ``AGENT_PROTECTED_SCRIPT_PLAN_FILENAMES``）。
 
@@ -895,6 +901,17 @@ class AgentAccessPolicy:
 #:   整目录 deny（清单在会话装配期一次性构造，集是运行时增删的，逐文件枚举必然落空；Bash
 #:   本就没有合法写入者），hook 拒正式 script_plan 与四类 revisioned quarantine 草稿。
 AgentAccessPolicy.PROTECTED_WRITE_RULES = (
+    ProtectedWriteRule(
+        name="character_appearance",
+        matches=AgentAccessPolicy._is_protected_character_appearance,
+        deny_message=(
+            "访问被拒绝：角色外貌证据、交付回执、提案和应用审计不可用 Write/Edit 直改。"
+            "采集与读取证据走 mcp__arcreel__collect_character_evidence / mcp__arcreel__read_character_evidence，"
+            "保存或读取提案走 mcp__arcreel__save_character_appearance_proposal / mcp__arcreel__get_character_appearance_proposal，"
+            "明确选择后应用走 mcp__arcreel__apply_character_appearance_proposal。"
+        ),
+        sandbox_subpaths=(CHARACTER_APPEARANCE_RELATIVE_PATH,),
+    ),
     ProtectedWriteRule(
         name="project_json",
         matches=AgentAccessPolicy._is_protected_project_json,

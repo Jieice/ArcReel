@@ -12,6 +12,30 @@ from tests.integration.server.routers.projects_router_support import (
 
 
 class TestProjectsRouter:
+    def test_create_project_with_custom_text_style(self, tmp_path, monkeypatch):
+        fake_pm = _FakePM(tmp_path)
+        client = build_projects_client(monkeypatch, fake_pm)
+        description = "半写实国风3D动画\n冷青蓝柔光，精细衣料材质"
+
+        with client:
+            response = client.post(
+                "/api/v1/projects",
+                json={
+                    "generation_mode": "storyboard",
+                    "title": "文字风格项目",
+                    "name": "custom-style",
+                    "style": description,
+                    "style_template_id": None,
+                    "content_mode": "drama",
+                },
+            )
+
+        assert response.status_code == 200
+        assert response.json()["project"]["style"] == description
+        assert fake_pm.project_data["custom-style"]["style"] == description
+        assert fake_pm.project_data["custom-style"].get("style_template_id") is None
+        assert fake_pm.project_data["custom-style"].get("style_image") is None
+
     def test_create_project_with_style_template_id_expands_prompt(self, tmp_path, monkeypatch):
         fake_pm = _FakePM(tmp_path)
         client = build_projects_client(monkeypatch, fake_pm)

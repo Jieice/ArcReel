@@ -120,6 +120,7 @@ export function CreateProjectModal() {
     activeCategory: "live",
     uploadedFile: null,
     uploadedPreview: null,
+    customText: "",
   });
   const [creating, setCreating] = useState(false);
 
@@ -196,6 +197,8 @@ export function CreateProjectModal() {
     const narrationProblem = narrationDeliveryProblem(narration);
     if (narrationProblem === "model") missing.push(t("project_tts_model_label"));
     if (narrationProblem === "voice") missing.push(t("narration_voice_label"));
+  } else if (style.mode === "text" && !style.customText?.trim()) {
+    missing.push(t("templates:custom_text_label"));
   }
   const generationLoading = step === 2 && !generationData && !generationError;
   const blocked = missing.length > 0 || invalid.length > 0 || generationLoading;
@@ -255,6 +258,7 @@ export function CreateProjectModal() {
                 : {}),
             }),
         style_template_id: style.mode === "template" ? style.templateId : null,
+        ...(style.mode === "text" ? { style: style.customText?.trim() } : {}),
         video_backend: models.videoBackend || null,
         default_image_backend: models.imageBackendDefault || null,
         default_text_backend: models.textBackendDefault || null,

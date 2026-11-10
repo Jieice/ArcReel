@@ -1,0 +1,6 @@
+# Local drawable asset descriptions, image routing, and full-body character framing.
+# Deployment and rollback: local-asset-descriptions.md.
+services:
+  arcreel:
+    image: arcreel/arcreel:local-character-evidence-ui-20261110-r3
+    pull_policy: never

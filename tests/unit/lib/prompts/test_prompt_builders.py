@@ -26,8 +26,32 @@ class TestCharacterPrompt:
         assert "黑发，冷静神态。" in prompt
         assert "Style: 古风" in prompt
         assert "Visual style: Cinematic, low-key lighting" in prompt
-        assert prompt.endswith("Avoid: 水印、多余文字、Logo")
+        assert prompt.endswith("Avoid: 半身构图、胸像、头像或面部特写、裁切头顶、裁切足部、水印、多余文字、Logo")
         assert "Cinematic, low-key lighting" in prompt
+
+    @pytest.mark.parametrize("description", ["穿着长袍的青年。", "红棕色皮毛的四足狐狸，长尾。"])
+    def test_each_character_view_requests_the_complete_body_with_safe_margins(self, description):
+        prompt = build_character_prompt("测试角色", description)
+
+        assert description in prompt
+        assert "每个面板都必须呈现同一角色的完整全身" in prompt
+        assert "从头部顶端到足部或尾端" in prompt
+        assert "动物与非人类角色按自身身体结构完整展示" in prompt
+        assert "平视远景" in prompt
+        assert "各面板四周和上下均留出安全边距" in prompt
+        assert "均匀中性光照明" in prompt
+
+    def test_full_body_constraints_stay_on_base_character_sheets(self):
+        other_prompts = [
+            build_scene_prompt("祠堂", "昏暗古朴"),
+            build_prop_prompt("玉佩", "古朴温润"),
+            build_product_prompt("护手霜", "白色管装"),
+            build_character_derivative_prompt("只将服装换为血袍"),
+        ]
+
+        assert all("完整全身" not in prompt for prompt in other_prompts)
+        assert all("半身构图、胸像" not in prompt for prompt in other_prompts)
+        assert all(prompt.endswith("水印、多余文字、Logo") for prompt in other_prompts)
 
 
 class TestScenePromptAndPropPrompt:

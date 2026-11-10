@@ -115,6 +115,32 @@ beforeEach(() => {
 });
 
 describe("ProjectSettingsPage – 分页与一次保存", () => {
+  it("saves text instead of a template and restores it when the style dialog is reopened", async () => {
+    const updateSpy = mockProject({ style_template_id: "live_premium_drama" });
+    renderAt("/app/projects/demo/settings?tab=style");
+    fireEvent.click(await screen.findByRole("button", { name: "更换" }));
+    const dialog = await screen.findByRole("dialog", { name: "更换风格" });
+    fireEvent.click(within(dialog).getByRole("tab", { name: "自定义" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "文字描述" }));
+    expect(within(dialog).getByRole("button", { name: "使用此风格" })).toBeDisabled();
+    fireEvent.change(within(dialog).getByRole("textbox", { name: "自定义风格描述" }), { target: { value: "国风 3D，细腻发丝\n冷青蓝电影柔光" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "使用此风格" }));
+    fireEvent.click(saveButton());
+    await waitFor(() => expect(updateSpy).toHaveBeenCalledWith("demo", { style_template_id: null, clear_style_image: true, style: "国风 3D，细腻发丝\n冷青蓝电影柔光" }));
+    await waitFor(() => expect(saveButton()).toBeDisabled());
+    fireEvent.click(screen.getByRole("button", { name: "更换" }));
+    expect(await screen.findByRole("textbox", { name: "自定义风格描述" })).toHaveValue("国风 3D，细腻发丝\n冷青蓝电影柔光");
+  });
+
+  it("recognizes a saved text-only style and clears it through the normal style patch", async () => {
+    const updateSpy = mockProject({ style: "半写实国风 3D 动画" });
+    renderAt("/app/projects/demo/settings?tab=style");
+    expect(await screen.findByText("半写实国风 3D 动画")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "清除风格" }));
+    fireEvent.click(saveButton());
+    await waitFor(() => expect(updateSpy).toHaveBeenCalledWith("demo", { style_template_id: null, clear_style_image: true }));
+  });
+
   it("没有 tab 参数时落在「基础」，侧栏分「项目」「Agent」两组", async () => {
     mockProject({});
     renderAt("/app/projects/demo/settings");

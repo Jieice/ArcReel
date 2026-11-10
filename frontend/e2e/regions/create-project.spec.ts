@@ -89,6 +89,49 @@ async function scrollBodyToTop(page: Page) {
 
 defineRegionScenarios("新建项目向导", [
   {
+    name: "3D 国风预设可选，切换后创建按钮仍可达",
+    path: LOBBY,
+    ready: lobbyReady,
+    act: async (page) => {
+      await openWizard(page);
+      await fillBasics(page);
+      await goNext(page);
+      await goNext(page);
+      const dialog = wizard(page);
+      await dialog.getByRole("tab", { name: "3D 国风" }).click();
+      const preset = dialog.getByRole("button", { name: "国风3D · 半写实" });
+      await preset.click();
+      await expect(preset).toHaveAttribute("aria-pressed", "true");
+      await expect(dialog.getByRole("button", { name: "国风3D · 水墨动画" })).toBeVisible();
+      await expect(dialog.getByRole("button", { name: "创建项目" })).toBeEnabled();
+      await expect(dialog.getByRole("button", { name: "创建项目" })).toBeInViewport({ ratio: 1 });
+    },
+  },
+  {
+    name: "自定义文字风格校验空白，切换参考图片后文字草稿保留",
+    path: LOBBY,
+    ready: lobbyReady,
+    act: async (page) => {
+      await openWizard(page);
+      await fillBasics(page);
+      await goNext(page);
+      await goNext(page);
+      const dialog = wizard(page);
+      await dialog.getByRole("tab", { name: "自定义" }).click();
+      await dialog.getByRole("button", { name: "文字描述" }).click();
+      const description = dialog.getByRole("textbox", { name: "自定义风格描述" });
+      await description.fill("   ");
+      await expect(dialog.getByRole("button", { name: "创建项目" })).toBeDisabled();
+      await description.fill("国风 3D 动画，细腻发丝、冷青蓝电影柔光");
+      await expect(dialog.getByRole("button", { name: "创建项目" })).toBeEnabled();
+      await dialog.getByRole("button", { name: "参考图片" }).click();
+      await expect(dialog.getByRole("button", { name: "上传风格参考图" })).toBeVisible();
+      await dialog.getByRole("button", { name: "文字描述" }).click();
+      await expect(description).toHaveValue("国风 3D 动画，细腻发丝、冷青蓝电影柔光");
+      await expect(dialog.getByRole("button", { name: "创建项目" })).toBeInViewport({ ratio: 1 });
+    },
+  },
+  {
     name: "第一步未填写时列出缺少的必填项，正文可滚到生成方式",
     path: LOBBY,
     ready: lobbyReady,

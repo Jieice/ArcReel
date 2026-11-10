@@ -42,6 +42,13 @@ from server.agent_toolset.asset_library import (
     SELECT_PROVIDER_LIBRARY_ASSET,
     UPLOAD_TO_PROVIDER_ASSET_LIBRARY,
 )
+from server.agent_toolset.character_appearance import (
+    APPLY_CHARACTER_APPEARANCE_PROPOSAL,
+    COLLECT_CHARACTER_EVIDENCE,
+    GET_CHARACTER_APPEARANCE_PROPOSAL,
+    READ_CHARACTER_EVIDENCE,
+    SAVE_CHARACTER_APPEARANCE_PROPOSAL,
+)
 from server.agent_toolset.declaration import (
     BLOCKED,
     MIGRATION_REFUSAL_NOTE,
@@ -120,6 +127,33 @@ SAMPLE_ARGUMENTS: dict[str, dict[str, Any]] = {
     "get_script_plan_content": {"episode_id": 1},
     "list_project_files": {},
     "read_project_file": {"path": "project.json"},
+    "collect_character_evidence": {"character_name": "甲"},
+    "read_character_evidence": {"snapshot_id": "cas_" + "0" * 32},
+    "save_character_appearance_proposal": {
+        "snapshot_id": "cas_" + "0" * 32,
+        "snapshot_revision": _ABSENT_REVISION,
+        "coverage": "partial",
+        "proposal": {
+            "summary": "待核验外貌提案",
+            "stages": [
+                {
+                    "stage_id": "unknown",
+                    "label": "未知时期",
+                    "period_status": "unknown",
+                    "period_reason": "尚无时期依据",
+                    "unknowns": ["尚待整理"],
+                }
+            ],
+        },
+    },
+    "get_character_appearance_proposal": {"proposal_id": "cap_" + "0" * 32},
+    "apply_character_appearance_proposal": {
+        "proposal_id": "cap_" + "0" * 32,
+        "proposal_revision": _ABSENT_REVISION,
+        "selection_id": "csel_" + "0" * 32,
+        "character_name": "甲",
+        "target": "base",
+    },
     "list_pending_assets": {"type": "character"},
     "generate_assets": {"type": "character", "names": ["张三"]},
     "generate_storyboards": {"script": "episode_1.json"},
@@ -582,6 +616,12 @@ _PROBLEM_ON_SAMPLE = frozenset(
         MERGE_ASSET.name,
         # 测试项目没有登记整本源文的文件。
         EDIT_SOURCE_TEXT.name,
+        # 人物分析样例未登记原文，快照与提案 ID 都是不存在的占位值。
+        COLLECT_CHARACTER_EVIDENCE.name,
+        READ_CHARACTER_EVIDENCE.name,
+        SAVE_CHARACTER_APPEARANCE_PROPOSAL.name,
+        GET_CHARACTER_APPEARANCE_PROPOSAL.name,
+        APPLY_CHARACTER_APPEARANCE_PROPOSAL.name,
         # 测试项目里没有样例路径的文件，回收站里也没有删除记录。
         DELETE_PROJECT_FILE.name,
         RESTORE_TRASH_RECORD.name,

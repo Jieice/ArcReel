@@ -3,15 +3,14 @@ services:
     image: arcreel/arcreel:latest
     # build: ../  # 本地构建时取消注释，注释掉 image 行
     ports:
-      - "1241:1241"
-    # 端口发布到宿主机所有网卡：远程部署不得在 .env 中设置 AUTH_ENABLED=false。
+      # 只绑本机回环（原为 "1241:1241" 暴露到局域网）。要局域网访问改回 "1241:1241"
+      - "127.0.0.1:1241:1241"
     env_file: .env
     environment:
       TZ: ${TZ:-Asia/Shanghai}
     # Agent Bash 沙箱 (bwrap) 需要：
     # 1) 非特权 user namespace → 放开 docker 默认 seccomp/apparmor profile
     # 2) bwrap 嵌套出的 net namespace 内配置 loopback → 容器需要 NET_ADMIN cap
-    #    （否则报 "loopback: Failed RTM_NEWADDR: Operation not permitted"）
     security_opt:
       - seccomp:unconfined
       - apparmor:unconfined
@@ -19,7 +18,11 @@ services:
       - NET_ADMIN
     volumes:
       - ./.env:/app/.env
-      - ./projects:/app/projects
+      # 【重要】数据目录用命名卷，不要用 ./projects 绑定 D 盘。
+      # Windows 上 D 盘经 9p/drvfs 挂载，跨目录重命名目录会 EACCES，
+      # 导致「删除项目」永远 500（PermissionError）。命名卷在 Linux 文件系统里，重命名正常。
+      # 备份/查看数据见 ../部署说明.md（docker run --rm -v arcreel-data:/data ...）
+      - arcreel-data:/app/projects
       - ./claude_data:/root/.claude
     restart: unless-stopped
     healthcheck:
@@ -27,3 +30,7 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+
+volumes:
+  arcreel-data:
+    external: true

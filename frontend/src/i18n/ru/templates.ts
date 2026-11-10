@@ -3,11 +3,16 @@ import type { DeepStringify } from '../types';
 
 export default {
   category: {
+    cn3d: "Китайский 3D",
     custom: "Свой стиль",
     live: "Игровое кино",
     anim: "Анимация",
   },
   name: {
+    anim_cn_3d_semireal: "Китайский 3D · Полуреализм",
+    anim_cn_3d_xianxia: "Китайский 3D · Эпос сянься",
+    anim_cn_3d_wuxia: "Китайский 3D · Мрачный уся",
+    anim_cn_3d_ink: "Китайский 3D · Тушевая анимация",
     live_cinematic_ancient: "Историческое кино",
     live_zhang_yimou: "Чжан Имоу",
     live_ancient_xianxia: "Древнее сянься",
@@ -46,6 +51,10 @@ export default {
     anim_90s_retro: "Ретро-аниме 90-х",
   },
   tagline: {
+    anim_cn_3d_semireal: "Детальные модели · Мягкий свет",
+    anim_cn_3d_xianxia: "Многослойные одежды · Горы в тумане",
+    anim_cn_3d_wuxia: "Холодные тени · Состаренные материалы",
+    anim_cn_3d_ink: "Объёмные герои · Атмосфера туши",
     live_cinematic_ancient: "Профессиональный свет · качество ТВ",
     live_zhang_yimou: "Насыщенные цвета · ритуальность",
     live_ancient_xianxia: "Линьцзянсянь · мягкий фильтр",
@@ -139,6 +148,11 @@ export default {
   tab_custom_desc: "Загрузите референс стиля, и ИИ проанализирует его. После загрузки шаблон стиля больше не используется.",
   upload_reference: "Загрузить референс стиля",
   supported_formats: "PNG / JPG / WEBP",
+  custom_text_mode: "Текстовое описание",
+  custom_image_mode: "Референсное изображение",
+  custom_text_label: "Описание собственного стиля",
+  custom_text_placeholder: "Например: полуреалистичная китайская 3D-анимация, детальные модели персонажей, тонкие волосы, мягкий кинематографический свет и холодные бирюзовые тона.",
+  custom_text_hint: "Опишите материалы, цвета, освещение и общий вид. В текстовом режиме референсное изображение не анализируется.",
   template_default_badge: "По умолчанию",
   wizard_step_basics: "Основное",
   wizard_step_generation: "Генерация",

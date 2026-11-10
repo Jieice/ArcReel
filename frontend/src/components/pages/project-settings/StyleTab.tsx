@@ -21,6 +21,9 @@ import type { ProjectStyle } from "./project-settings-form";
 import { TabHeader } from "./SettingsBlock";
 
 function toPickerValue(style: ProjectStyle): StylePickerValue {
+  if (style.kind === "text") {
+    return { mode: "text", templateId: null, activeCategory: "live", uploadedFile: null, uploadedPreview: null, customText: style.description };
+  }
   if (style.kind === "image") {
     return { mode: "custom", templateId: null, activeCategory: "live", uploadedFile: style.file, uploadedPreview: style.preview };
   }
@@ -29,13 +32,16 @@ function toPickerValue(style: ProjectStyle): StylePickerValue {
   return { mode: "template", templateId, activeCategory: category, uploadedFile: null, uploadedPreview: null };
 }
 
-/** 选择器里是否已选定风格：模版选了卡片，或参考图有图。 */
+/** 选择器里是否已选定风格：模版选了卡片、文字非空，或参考图有图。 */
 function draftComplete(draft: StylePickerValue): boolean {
-  return draft.mode === "template" ? !!draft.templateId : !!(draft.uploadedFile ?? draft.uploadedPreview);
+  return draft.mode === "template" ? !!draft.templateId : draft.mode === "text" ? !!draft.customText?.trim() : !!(draft.uploadedFile ?? draft.uploadedPreview);
 }
 
 /** 选择器里的选择换算成项目风格；还没选定时返回 null。只在采用时调用：新参考图会新建预览地址。 */
 function fromPickerValue(draft: StylePickerValue, current: ProjectStyle): ProjectStyle | null {
+  if (draft.mode === "text") {
+    return draft.customText?.trim() ? { kind: "text", description: draft.customText.trim() } : null;
+  }
   if (draft.mode === "template") {
     return draft.templateId ? { kind: "template", templateId: draft.templateId } : null;
   }
@@ -62,6 +68,9 @@ function CurrentStyle({ value: style }: { value: ProjectStyle }) {
   } else if (style.kind === "image") {
     name = t("style_custom");
     summary = style.file ? t("style_pending_upload_desc") : style.description;
+  } else if (style.kind === "text") {
+    name = t("templates:custom_text_mode");
+    summary = style.description;
   } else {
     name = t("style_not_set");
     summary = t("style_not_set_desc");

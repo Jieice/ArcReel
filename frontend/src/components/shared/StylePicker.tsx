@@ -1,10 +1,12 @@
 import { TruncatedText } from "@/components/shared/TruncatedText";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Upload, X } from "lucide-react";
 import { cn } from "cn";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DEFAULT_TEMPLATE_ID,
@@ -13,9 +15,10 @@ import {
 } from "@/data/style-templates";
 
 export interface StylePickerValue {
-  mode: "template" | "custom";
+  mode: "template" | "custom" | "text";
   templateId: string | null;
-  activeCategory: "live" | "anim";
+  activeCategory: StyleCategory;
+  customText?: string;
   /** 待上传的参考图；有文件时选择器按文件自建预览，不读 `uploadedPreview`。 */
   uploadedFile: File | null;
   /** 已保存的参考图地址（/api/v1/files/...）；选择器不往这里写 blob: 地址。 */
@@ -99,16 +102,17 @@ function useFilePreview(file: File | null): string | null {
 }
 
 /**
- * 风格选择：风格模版（真人、动画两类）或上传一张风格参考图。
+ * 风格选择：真人、动画、国风 3D 模版，文字描述或风格参考图。
  * 模版网格不自带滚动，由所在的弹层或页面负责滚动，避免嵌套滚动区。
  */
 export function StylePicker({ value, onChange }: StylePickerProps) {
   const { t } = useTranslation(["common", "templates"]);
+  const customTextId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const filePreview = useFilePreview(value.uploadedFile);
   const preview = value.uploadedFile ? filePreview : value.uploadedPreview;
 
-  const activeTab: StyleTab = value.mode === "custom" ? "custom" : value.activeCategory;
+  const activeTab: StyleTab = value.mode === "template" ? value.activeCategory : "custom";
 
   const handleTabChange = (tab: StyleTab) => {
     if (tab === "custom") {
@@ -157,41 +161,75 @@ export function StylePicker({ value, onChange }: StylePickerProps) {
       <TabsList>
         <TabsTrigger value="live">{t("templates:category.live")}</TabsTrigger>
         <TabsTrigger value="anim">{t("templates:category.anim")}</TabsTrigger>
+        <TabsTrigger value="cn3d">{t("templates:category.cn3d")}</TabsTrigger>
         <TabsTrigger value="custom">{t("templates:category.custom")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="live" className="mt-2">{templateGrid("live")}</TabsContent>
       <TabsContent value="anim" className="mt-2">{templateGrid("anim")}</TabsContent>
+      <TabsContent value="cn3d" className="mt-2">{templateGrid("cn3d")}</TabsContent>
       <TabsContent value="custom" className="mt-2">
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">{t("templates:tab_custom_desc")}</p>
-          {preview ? (
-            <div className="relative overflow-hidden rounded-lg border border-border">
-              <img src={preview} alt={t("templates:upload_reference")} className="h-48 w-full object-cover" />
-              <div className="absolute top-2 right-2">
-                <Button variant="secondary" size="icon-sm" onClick={handleClearUpload} aria-label={t("common:remove")}>
-                  <X />
-                </Button>
-              </div>
+          <div className="flex gap-2">
+            <Button
+              variant={value.mode === "text" ? "secondary" : "outline"}
+              aria-pressed={value.mode === "text"}
+              onClick={() => onChange({ ...value, mode: "text" })}
+            >
+              {t("templates:custom_text_mode")}
+            </Button>
+            <Button
+              variant={value.mode === "custom" ? "secondary" : "outline"}
+              aria-pressed={value.mode === "custom"}
+              onClick={() => onChange({ ...value, mode: "custom" })}
+            >
+              {t("templates:custom_image_mode")}
+            </Button>
+          </div>
+          {value.mode === "text" ? (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={customTextId}>{t("templates:custom_text_label")}</Label>
+              <Textarea
+                id={customTextId}
+                value={value.customText ?? ""}
+                onChange={(event) => onChange({ ...value, customText: event.target.value })}
+                placeholder={t("templates:custom_text_placeholder")}
+                rows={5}
+              />
+              <p className="text-xs text-muted-foreground">{t("templates:custom_text_hint")}</p>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-input px-3 py-8 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <Upload className="size-4" aria-hidden />
-              {t("templates:upload_reference")}
-            </button>
+            <>
+                <p className="text-sm text-muted-foreground">{t("templates:tab_custom_desc")}</p>
+                {preview ? (
+                  <div className="relative overflow-hidden rounded-lg border border-border">
+                    <img src={preview} alt={t("templates:upload_reference")} className="h-48 w-full object-cover" />
+                    <div className="absolute top-2 right-2">
+                      <Button variant="secondary" size="icon-sm" onClick={handleClearUpload} aria-label={t("common:remove")}>
+                        <X />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-input px-3 py-8 text-sm text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+                  >
+                    <Upload className="size-4" aria-hidden />
+                    {t("templates:upload_reference")}
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <p className="text-xs text-muted-foreground">{t("templates:supported_formats")}</p>
+            </>
           )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".png,.jpg,.jpeg,.webp"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <p className="text-xs text-muted-foreground">{t("templates:supported_formats")}</p>
         </div>
       </TabsContent>
     </Tabs>
